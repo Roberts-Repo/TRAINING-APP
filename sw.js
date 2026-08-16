@@ -1,16 +1,20 @@
 /* Training Log service worker: offline-first shell */
-const CACHE = 'training-log-v1';
+const CACHE = 'training-log-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/maskable-512.png'
+  './icon-192.png',
+  './icon-512.png',
+  './maskable-512.png'
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => Promise.allSettled(ASSETS.map(a => c.add(a))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
@@ -22,10 +26,10 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  // Never cache API traffic
   if (url.hostname === 'api.anthropic.com') return;
-  // Fonts: cache after first fetch
+
   if (url.hostname.endsWith('gstatic.com') || url.hostname.endsWith('googleapis.com')) {
     e.respondWith(
       caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
@@ -36,7 +40,7 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-  if (e.request.method !== 'GET') return;
+
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).catch(() => caches.match('./index.html')))
   );
