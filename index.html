@@ -193,13 +193,24 @@ button:hover:not([disabled]){filter:brightness(1.08)}
 .dl .x:hover{color:var(--red)}
 
 /* food */
-.ebal{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bd2);border-radius:12px;overflow:hidden;margin-bottom:18px}
-.ebal div{background:var(--s1);padding:12px 6px 13px;text-align:center}
-.ebal .v{font-size:19px;font-weight:700;letter-spacing:-.04em;line-height:1}
-.ebal .k{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mu);margin-top:6px}
-.ebal .burn{color:var(--lime)}
-.ebal .left{color:var(--lime)}
-.ebal .left.over{color:var(--red)}
+.steps-in{display:flex;gap:9px;align-items:flex-end;margin:-2px 0 18px}
+.steps-in label{flex:1 1 auto}
+.steps-in .lab{display:block;margin-bottom:7px}
+
+
+.ebal{margin-bottom:18px}
+.lg{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;font-size:13.5px;color:var(--tx2)}
+.lg span:last-child{font-family:'DM Mono',monospace;font-size:13px;color:var(--tx);white-space:nowrap}
+.lg small{display:block;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--mu);margin-top:2px;font-weight:400}
+.lg.add span:last-child{color:var(--lime)}
+.lg.sub span:last-child{color:var(--red)}
+.lg.rule{border-top:1px solid var(--bd2);padding-top:11px;margin-top:2px}
+.lg.sum{font-weight:600;color:var(--tx)}
+.lg.sum span:last-child{font-size:15px;font-weight:500}
+.lg.final{border-top:1px solid var(--bd);margin-top:6px;padding-top:14px;align-items:center}
+.lg.final .fl{font-size:15px;font-weight:600;color:var(--tx)}
+.lg.final span:last-child{font-size:30px;font-weight:700;letter-spacing:-.04em;font-family:'Schibsted Grotesk',sans-serif;color:var(--lime)}
+.lg.final.over span:last-child{color:var(--red)}
 .eatback{display:flex;gap:11px;align-items:flex-start;margin-top:18px;padding-top:16px;border-top:1px solid var(--bd2);cursor:pointer;font-size:13px;color:var(--tx2)}
 .eatback input{width:19px;height:19px;flex:none;margin-top:1px;accent-color:var(--lime);border-radius:5px}
 .eatback small{display:block;color:var(--mu);font-size:11.5px;margin-top:3px;line-height:1.45}
@@ -320,9 +331,9 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
 <!-- ============ TODAY ============ -->
 <div class="view on" id="v-home">
   <div class="targets">
-    <div class="targ"><div class="v num">2,000<u>kcal</u></div><div class="lab">Eat, rest day</div></div>
+    <div class="targ"><div class="v num">1,495<u>kcal</u></div><div class="lab">Eat, zero steps</div></div>
     <div class="targ"><div class="v num">145<u>g</u></div><div class="lab">Protein</div></div>
-    <div class="targ"><div class="v num">2,500<u>kcal</u></div><div class="lab">Base burn</div></div>
+    <div class="targ"><div class="v num">1,995<u>kcal</u></div><div class="lab">Base, no walking</div></div>
     <div class="targ"><div class="v num">94<u>cm</u></div><div class="lab">Waist target</div></div>
   </div>
 
@@ -492,6 +503,11 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
       <div class="dlabel" id="f-day">Today</div>
       <button id="f-next" aria-label="Next day">›</button>
     </div>
+    <div class="steps-in">
+      <label><span class="lab">Steps today, from your phone</span>
+        <input type="number" id="d-steps" inputmode="numeric" placeholder="7179"></label>
+      <button id="steps-save">Save</button>
+    </div>
     <div class="ebal" id="ebal"></div>
     <div class="gauge">
       <div class="gt"><span class="lab">Calories</span><span class="gv num" id="g-kcal">0<u> / 2,000</u></span></div>
@@ -606,6 +622,7 @@ async function load(){
   try{const r=await window.storage.get(K_W);if(r)addedWeights=JSON.parse(r.value);}catch(e){}
   try{const r=await window.storage.get(K_F);if(r)food=JSON.parse(r.value);}catch(e){}
   try{const r=await window.storage.get('log:rawburn');if(r)rawBurn=(r.value==='1');}catch(e){}
+  try{const r=await window.storage.get(K_ST);if(r)steps=JSON.parse(r.value);}catch(e){}
   render();renderFood();
 }
 async function save(k,v){try{await window.storage.set(k,JSON.stringify(v));return true;}catch(e){return false;}}
@@ -1048,12 +1065,30 @@ const STAPLES=[
   ["Rice cakes + peanut butter",180,6]]]
 ];
 const K_F="log:food:v1";
-let food={},foodDay=isoOf(new Date()),lastRemoved=null,rawBurn=false;
+let food={},foodDay=isoOf(new Date()),lastRemoved=null,rawBurn=false,steps={};
+const K_ST='log:steps:v1';
 
 function foodEntries(){return food[foodDay]||[];}
 async function saveFood(){return save(K_F,food);}
 
-const MAINTENANCE=2500, DEFICIT=500, BASE_PRO=145, BURN_HAIRCUT=0.75;
+const MAINTENANCE=1995, DEFICIT=500, BASE_PRO=145, BURN_HAIRCUT=0.75;
+const BODY_KG=90.2;              // used for the walking cost
+const STRIDE_M=0.78;             // average stride at 5ft 10
+const STEPS_PER_KM=Math.round(1000/STRIDE_M);
+const BASE_STEPS=0;              // base assumes no walking, so every step counts
+const KCAL_PER_STEP=0.0003*BODY_KG;   // net of resting, about 0.027 at 90 kg
+
+/* distance already covered inside a logged session, so it is not counted twice */
+function gymKm(day){
+  return allSessions().filter(s=>s.date===day)
+    .reduce((t,s)=>t+(s.cardio||[]).reduce((a,c)=>a+(+c.km||0),0),0);
+}
+function walkOn(day){
+  const total=+(steps[day]||0);
+  const gymSteps=Math.round(gymKm(day)*STEPS_PER_KM);
+  const net=Math.max(total-gymSteps-BASE_STEPS,0);
+  return {total, gymSteps, net, kcal:Math.round(net*KCAL_PER_STEP)};
+}
 function burnOn(day){
   const raw=allSessions().filter(s=>s.date===day).reduce((t,s)=>t+(s.kcal||0),0);
   return {raw:Math.round(raw), used:Math.round(raw*(rawBurn?1:BURN_HAIRCUT))};
@@ -1068,24 +1103,36 @@ function renderFood(){
   document.getElementById('f-next').disabled = foodDay>=today;
 
   const b=burnOn(foodDay);
-  const burned=MAINTENANCE+b.used;
+  const wk=walkOn(foodDay);
+  const burned = MAINTENANCE+b.used+wk.kcal;
+  document.getElementById('d-steps').value = steps[foodDay]||'';
   const allow=burned-DEFICIT;
   const left=allow-kc;
   const actual=burned-kc;
 
-  document.getElementById('ebal').innerHTML=`
-    <div><div class="v num">${burned.toLocaleString()}</div><div class="k">Burned</div></div>
-    <div><div class="v num">${allow.toLocaleString()}</div><div class="k">Allowance</div></div>
-    <div><div class="v num">${kc.toLocaleString()}</div><div class="k">Eaten</div></div>
-    <div><div class="v num left ${left<0?'over':''}">${left.toLocaleString()}</div><div class="k">${left<0?'Over':'Left'}</div></div>`;
+  const rows=[`<div class="lg"><span>Base burn<small>BMR 1,813 plus digestion and fidgeting, no walking at all</small></span><span>${MAINTENANCE.toLocaleString()}</span></div>`];
+  if(b.used){
+    rows.push(`<div class="lg add"><span>Gym session<small>machine said ${b.raw}${rawBurn?', counted in full':', trimmed by a quarter'}</small></span><span>+${b.used.toLocaleString()}</span></div>`);
+  }
+  if(wk.total){
+    const bits=[`${wk.total.toLocaleString()} steps`];
+    if(wk.gymSteps)bits.push(`less ${wk.gymSteps.toLocaleString()} done on the treadmill`);
+    rows.push(`<div class="lg ${wk.kcal?'add':''}"><span>Walking<small>${bits.join(', ')}</small></span><span>${wk.kcal?'+'+wk.kcal:'0'}</span></div>`);
+  }
+  rows.push(`<div class="lg rule sum"><span>Burned today</span><span>${burned.toLocaleString()}</span></div>`);
+  rows.push(`<div class="lg sub"><span>Target deficit</span><span>\u2212${DEFICIT.toLocaleString()}</span></div>`);
+  rows.push(`<div class="lg rule sum"><span>Allowance</span><span>${allow.toLocaleString()}</span></div>`);
+  rows.push(`<div class="lg sub"><span>Eaten</span><span>\u2212${kc.toLocaleString()}</span></div>`);
+  rows.push(`<div class="lg final ${left<0?'over':''}"><span class="fl">${left<0?'Over by':'Left to eat'}</span><span>${Math.abs(left).toLocaleString()}</span></div>`);
+  document.getElementById('ebal').innerHTML=rows.join('');
 
   const cb=document.getElementById('eatback');
   cb.checked=rawBurn;
   document.getElementById('eb-note').textContent = b.raw
-    ? (rawBurn
-        ? `Using the machine's ${b.raw} kcal in full. It counts what you would have burned anyway, so it runs high.`
-        : `Machine said ${b.raw} kcal, counted as ${b.used}. Gym kit typically overstates by about a quarter.`)
-    : `No session on this day, so today is the base ${MAINTENANCE.toLocaleString()}.`;
+      ? (rawBurn
+          ? `Using the machine's ${b.raw} kcal in full. It counts what you would have burned anyway, so it runs high.`
+          : `Machine said ${b.raw} kcal, counted as ${b.used}. Gym kit typically overstates by about a quarter.`)
+      : `No session on this day, so today is the base ${MAINTENANCE.toLocaleString()}.`;
 
   document.getElementById('n-def').textContent = kc
     ? (actual>=0 ? `${actual.toLocaleString()} kcal deficit so far today` : `${Math.abs(actual).toLocaleString()} kcal surplus today`)
@@ -1158,6 +1205,12 @@ async function addFood(name,kcal,p,items){
 document.getElementById('eatback').onclick=async ev=>{
   rawBurn=ev.target.checked;
   try{await window.storage.set('log:rawburn',rawBurn?'1':'0');}catch(e){}
+  renderFood();
+};
+document.getElementById('steps-save').onclick=async()=>{
+  const v=parseInt(document.getElementById('d-steps').value,10);
+  if(v>0)steps[foodDay]=v; else delete steps[foodDay];
+  try{await window.storage.set(K_ST,JSON.stringify(steps));}catch(e){}
   renderFood();
 };
 document.getElementById('f-prev').onclick=()=>{const d=D(foodDay);d.setDate(d.getDate()-1);foodDay=isoOf(d);renderFood();};
