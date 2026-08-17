@@ -86,25 +86,29 @@ section{margin-bottom:14px}
 .pos{color:var(--lime-d)}.neg{color:var(--red)}
 
 /* chart */
-svg.chart{width:100%;height:196px;display:block;overflow:visible}
+svg.chart{width:100%;height:auto;display:block;overflow:visible}
 .key{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;padding-top:15px;border-top:1px solid var(--bd2)}
 .key i{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:-1px}
 .read{margin-top:13px;font-size:13px;color:var(--mu)}
 
-/* matrix */
-.mscroll{overflow-x:auto;margin:0 -20px;padding:0 20px;scrollbar-width:thin}
-table.mx{border-collapse:separate;border-spacing:0;width:100%;min-width:355px}
-table.mx th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);font-weight:400;padding:0 0 12px;text-align:center;white-space:nowrap}
-table.mx th.rh{text-align:left;width:36%}
-table.mx td{padding:0 4px 5px 0;text-align:center}
-table.mx td:last-child{padding-right:0}
-.cell{height:32px;border-radius:8px;background:rgba(255,255,255,.055);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--tx2)}
-.cell.new{background:var(--lime);color:#0A0B0A;font-weight:500}
-.cell.miss{background:transparent;box-shadow:inset 0 0 0 1px var(--bd2);color:#3C423A}
-.rn{font-size:13px;font-weight:500;padding:0 10px 5px 0;line-height:1.25}
-.rn small{display:block;color:var(--mu);font-size:10.5px;font-weight:400;font-family:'DM Mono',monospace}
-.mkey{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;padding-top:15px;border-top:1px solid var(--bd2)}
-.mkey i{width:13px;height:9px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:-1px}
+/* progression cards */
+.lift{background:var(--s1);border:1px solid var(--bd2);border-radius:16px;padding:16px 17px 14px;margin-bottom:8px}
+.lift-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lift-nm{font-size:15.5px;font-weight:600;letter-spacing:-.02em}
+.lift-pr{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--mu);white-space:nowrap}
+.lift-pr b{color:var(--lime);font-weight:500}
+.spark{display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:14px}
+.bar{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:5px}
+.bar i{display:block;width:100%;border-radius:6px 6px 3px 3px;background:rgba(255,255,255,.09);min-height:4px}
+.bar.pr i{background:var(--lime)}
+.bar.gap i{background:transparent;box-shadow:inset 0 0 0 1px var(--bd2);height:4px!important}
+.bar span{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);line-height:1}
+.bar.pr span{color:var(--lime)}
+@media(prefers-reduced-motion:no-preference){.bar i{transition:height .5s cubic-bezier(.2,.85,.3,1)}}
+.spark-x{display:flex;gap:5px;margin-top:7px;padding-top:8px;border-top:1px solid var(--bd2)}
+.spark-x span{flex:1 1 0;text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:#5C635A;letter-spacing:.02em}
+.lift-foot{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--mu)}
+.up{color:var(--lime)}.dn{color:var(--red)}
 
 /* notes */
 .note{background:var(--s1);border:1px solid var(--bd2);border-radius:15px;padding:17px 19px;margin-bottom:8px}
@@ -189,6 +193,17 @@ button:hover:not([disabled]){filter:brightness(1.08)}
 .dl .x:hover{color:var(--red)}
 
 /* food */
+.ebal{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bd2);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.ebal div{background:var(--s1);padding:12px 6px 13px;text-align:center}
+.ebal .v{font-size:19px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.ebal .k{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mu);margin-top:6px}
+.ebal .burn{color:var(--lime)}
+.ebal .left{color:var(--lime)}
+.ebal .left.over{color:var(--red)}
+.eatback{display:flex;gap:11px;align-items:flex-start;margin-top:18px;padding-top:16px;border-top:1px solid var(--bd2);cursor:pointer;font-size:13px;color:var(--tx2)}
+.eatback input{width:19px;height:19px;flex:none;margin-top:1px;accent-color:var(--lime);border-radius:5px}
+.eatback small{display:block;color:var(--mu);font-size:11.5px;margin-top:3px;line-height:1.45}
+
 .gauge{margin-bottom:16px}
 .gauge:last-child{margin-bottom:0}
 .gauge .gt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
@@ -247,6 +262,8 @@ details.fitem[open] .caret{transform:rotate(90deg)}
 @media(prefers-reduced-motion:no-preference){.scrim.on .sheet{animation:up .3s cubic-bezier(.2,.85,.3,1) both}}
 @keyframes up{from{transform:translateY(28px);opacity:0}to{transform:none;opacity:1}}
 .grab{width:38px;height:4px;border-radius:3px;background:rgba(255,255,255,.16);margin:0 auto 16px}
+.mnote{background:rgba(255,107,78,.1);border:1px solid rgba(255,107,78,.35);color:#FFB9A8;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
+.mnote b{color:var(--tx)}
 .mshot{width:100%;max-height:190px;object-fit:cover;border-radius:14px;border:1px solid var(--bd);margin-bottom:16px;display:block}
 .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px}
 .mtot{font-family:'DM Mono',monospace;font-size:12px;color:var(--lime);white-space:nowrap}
@@ -302,6 +319,13 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
 
 <!-- ============ TODAY ============ -->
 <div class="view on" id="v-home">
+  <div class="targets">
+    <div class="targ"><div class="v num">2,000<u>kcal</u></div><div class="lab">Eat, rest day</div></div>
+    <div class="targ"><div class="v num">145<u>g</u></div><div class="lab">Protein</div></div>
+    <div class="targ"><div class="v num">2,500<u>kcal</u></div><div class="lab">Base burn</div></div>
+    <div class="targ"><div class="v num">94<u>cm</u></div><div class="lab">Waist target</div></div>
+  </div>
+
   <div class="card hero">
     <div class="hero-top">
       <div>
@@ -317,7 +341,7 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
 
   <div class="head"><h2>Bodyweight</h2><span class="lab">morning carries the line</span></div>
   <div class="card">
-    <svg class="chart" id="chart" viewBox="0 0 620 196" preserveAspectRatio="none" role="img" aria-label="Bodyweight over time"></svg>
+    <svg class="chart" id="chart" role="img" aria-label="Bodyweight over time"></svg>
     <div class="key lab">
       <span><i style="background:var(--lime)"></i>Morning, fasted</span>
       <span><i style="background:transparent;box-shadow:inset 0 0 0 2px var(--mu)"></i>Other time</span>
@@ -328,27 +352,13 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
   <div class="head"><h2>Worth knowing</h2></div>
   <div id="notes"></div>
 
-  <div class="head"><h2>Daily targets</h2><span class="lab">set daily, judge weekly</span></div>
-  <div class="targets">
-    <div class="targ"><div class="v num">2,000<u>kcal</u></div><div class="lab">Eat</div></div>
-    <div class="targ"><div class="v num">145<u>g</u></div><div class="lab">Protein</div></div>
-    <div class="targ"><div class="v num">2,500<u>kcal</u></div><div class="lab">Maintenance</div></div>
-    <div class="targ"><div class="v num">94<u>cm</u></div><div class="lab">Waist target</div></div>
-  </div>
-  <p class="hint">Roughly 14,000 kcal across the week. A heavier Saturday is fine if the week totals out.</p>
+  <p class="hint">Gym days add the session burn on top, so the allowance rises. Set daily, judge weekly.</p>
 </div>
 
 <!-- ============ LIFTS ============ -->
 <div class="view" id="v-lifts">
-  <div class="head" style="padding-top:6px"><h2>Every lift, every session</h2><span class="lab">top load, kg</span></div>
-  <div class="card">
-    <div class="mscroll"><table class="mx" id="matrix"></table></div>
-    <div class="mkey lab">
-      <span><i style="background:var(--lime)"></i>PR</span>
-      <span><i style="background:rgba(255,255,255,.055)"></i>Logged</span>
-      <span><i style="box-shadow:inset 0 0 0 1px var(--bd2)"></i>Skipped</span>
-    </div>
-  </div>
+  <div class="head" style="padding-top:6px"><h2>Progression</h2><span class="lab">top load per session</span></div>
+  <div id="matrix"></div>
   <div class="head"><h2>Movement split</h2><span class="lab">working sets by area</span></div>
   <div class="card" id="split"></div>
 </div>
@@ -482,22 +492,28 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
       <div class="dlabel" id="f-day">Today</div>
       <button id="f-next" aria-label="Next day">›</button>
     </div>
+    <div class="ebal" id="ebal"></div>
     <div class="gauge">
       <div class="gt"><span class="lab">Calories</span><span class="gv num" id="g-kcal">0<u> / 2,000</u></span></div>
       <div class="track"><b id="b-kcal" style="width:0%"></b></div>
       <div class="gnote" id="n-kcal"></div>
+      <div class="gnote" id="n-def" style="color:var(--lime)"></div>
     </div>
     <div class="gauge">
       <div class="gt"><span class="lab">Protein</span><span class="gv num" id="g-pro">0<u> / 145 g</u></span></div>
       <div class="track"><b id="b-pro" style="width:0%"></b></div>
       <div class="gnote" id="n-pro"></div>
     </div>
+    <label class="eatback">
+      <input type="checkbox" id="eatback">
+      <span>Use the machine's raw calorie figure<small id="eb-note"></small></span>
+    </label>
   </div>
 
   <div class="head"><h2>Quick add</h2><span class="lab">tap to log</span></div>
   <div class="card" id="quick"></div>
 
-  <div class="head"><h2>Eating out</h2><span class="lab">photo, description or paste</span></div>
+  <div class="head"><h2>Eating out</h2><span class="lab">photo or description</span></div>
   <div class="card">
     <div class="row">
       <button id="f-cam" style="flex:1 1 100%">Add meal photo</button>
@@ -510,13 +526,6 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
       <button id="f-est" class="ghost" style="flex:1 1 100%">Estimate from description</button>
     </div>
     <div class="msg" id="f-msg"></div>
-    <hr style="border:none;border-top:1px solid var(--bd2);margin:18px 0">
-    <div class="lab" style="margin-bottom:9px">Or paste from chat</div>
-    <div class="row">
-      <label class="f1"><textarea id="f-paste" placeholder='Steak dinner, 1150, 68' style="min-height:52px"></textarea></label>
-      <button id="f-padd" class="ghost">Add</button>
-    </div>
-    <p class="hint">Send me the photo in the chat and I'll reply with a line like <span class="mono" style="color:var(--tx2)">Steak dinner, 1150, 68</span>. Paste it above. Name, calories, protein.</p>
   </div>
 
   <div class="head"><h2>Logged today</h2></div>
@@ -526,6 +535,7 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
 <div class="scrim" id="scrim" role="dialog" aria-modal="true" aria-label="Check the estimate">
   <div class="sheet">
     <div class="grab"></div>
+    <div id="m-note" class="mnote" style="display:none"></div>
     <img id="m-shotimg" class="mshot" alt="" style="display:none">
     <label style="margin-bottom:16px"><span class="lab" style="display:block;margin-bottom:7px">Meal name</span>
       <input type="text" id="m-name" autocomplete="off"></label>
@@ -595,6 +605,7 @@ async function load(){
   try{const r=await window.storage.get(K_S);if(r)addedSessions=JSON.parse(r.value);}catch(e){}
   try{const r=await window.storage.get(K_W);if(r)addedWeights=JSON.parse(r.value);}catch(e){}
   try{const r=await window.storage.get(K_F);if(r)food=JSON.parse(r.value);}catch(e){}
+  try{const r=await window.storage.get('log:rawburn');if(r)rawBurn=(r.value==='1');}catch(e){}
   render();renderFood();
 }
 async function save(k,v){try{await window.storage.set(k,JSON.stringify(v));return true;}catch(e){return false;}}
@@ -614,6 +625,7 @@ const num=v=>{const n=parseFloat(v);return isFinite(n)?n:null;};
 function render(){
   const S=allSessions(),W=allWeights();
   hero(S);tiles(S,W);chart(W);matrix(S);split(S);notes(S);sessionList(S);wlist(W);
+  if(typeof renderFood==='function'&&document.getElementById('ebal'))renderFood();
   document.getElementById('top-right').textContent=S.length+" sessions";
   document.getElementById('exlist').innerHTML=
     [...new Set([...S.flatMap(s=>s.lifts.map(l=>l.name)),...KNOWN])].sort()
@@ -649,53 +661,133 @@ function tiles(S,W){
   ].map(c=>`<div class="tile"><div class="n num ${c.c||''}">${c.n}${c.u?`<u>${c.u}</u>`:''}</div><div class="lab">${c.l}</div></div>`).join('');
 }
 
-/* ---------- chart ---------- */
+/* ---------- bodyweight chart ---------- */
 function chart(W){
-  const svg=document.getElementById('chart');if(!W.length){svg.innerHTML='';return;}
-  const w=620,h=196,p={t:26,r:34,b:26,l:6};
-  const kg=W.map(d=>d.kg),lo=Math.min(...kg)-1.3,hi=Math.max(...kg)+1.3;
-  const t0=D(W[0].date).getTime(),t1=D(W[W.length-1].date).getTime();
-  const sp=Math.max(t1-t0,864e5*7);
-  const X=d=>p.l+(D(d).getTime()-t0)/sp*(w-p.l-p.r),Y=k=>p.t+(hi-k)/(hi-lo)*(h-p.t-p.b);
-  let g=`<defs><linearGradient id="fd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C6FF3D" stop-opacity=".2"/><stop offset="1" stop-color="#C6FF3D" stop-opacity="0"/></linearGradient></defs>`;
-  for(let k=Math.ceil(lo);k<=Math.floor(hi);k++){const y=Y(k);
-    g+=`<line x1="0" y1="${y}" x2="${w-p.r+2}" y2="${y}" stroke="rgba(255,255,255,.05)"/>`;
-    g+=`<text x="${w-p.r+9}" y="${y+3.5}" fill="#7C837A" font-family="DM Mono,monospace" font-size="10">${k}</text>`;}
-  const m=W.filter(d=>d.when==='morning');
-  if(m.length>1){
-    const pts=m.map(d=>[X(d.date),Y(d.kg)]),ln=pts.map(a=>a.join(',')).join(' ');
-    g+=`<polygon points="${ln} ${pts[pts.length-1][0]},${h-p.b} ${pts[0][0]},${h-p.b}" fill="url(#fd)"/>`;
-    g+=`<polyline points="${ln}" fill="none" stroke="#C6FF3D" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>`;
-  }
-  W.forEach(d=>{const x=X(d.date),y=Y(d.kg),mo=d.when==='morning';
-    g+= mo?`<circle cx="${x}" cy="${y}" r="5.5" fill="#C6FF3D"/><circle cx="${x}" cy="${y}" r="2" fill="#0A0B0A"/>`
-          :`<circle cx="${x}" cy="${y}" r="4.5" fill="#0A0B0A" stroke="#7C837A" stroke-width="2"/>`;
-    g+=`<text x="${x}" y="${y-13}" fill="${mo?'#EFF2EA':'#7C837A'}" font-family="DM Mono,monospace" font-weight="500" font-size="11" text-anchor="middle">${d.kg}</text>`;
-    g+=`<text x="${x}" y="${h-4}" fill="#7C837A" font-family="DM Mono,monospace" font-size="9.5" text-anchor="middle">${fs(d.date)}</text>`;});
-  svg.innerHTML=g;
-  document.getElementById('read').textContent=m.length<2
-    ?"One clean morning reading so far. The line starts drawing itself from the second one."
-    :`Morning to morning: ${(m[m.length-1].kg-m[0].kg>=0?'+':'')}${(m[m.length-1].kg-m[0].kg).toFixed(1)} kg across ${m.length} readings.`;
-}
+  const svg=document.getElementById('chart');
+  if(!svg)return;
+  if(!W.length){svg.innerHTML='';return;}
 
-/* ---------- matrix ---------- */
+  const box=svg.parentElement.getBoundingClientRect();
+  const w=Math.max(Math.round(box.width-40),260), hgt=210;
+  svg.setAttribute('viewBox',`0 0 ${w} ${hgt}`);
+  svg.setAttribute('width','100%');
+  svg.setAttribute('height',hgt);
+
+  const pad={t:30,r:44,b:30,l:8};
+  const morn=W.filter(d=>d.when==='morning');
+  const kg=W.map(d=>d.kg);
+  let lo=Math.min(...kg), hi=Math.max(...kg);
+  const padKg=Math.max((hi-lo)*0.35,0.9);
+  lo-=padKg; hi+=padKg;
+
+  const t0=D(W[0].date).getTime(), t1=D(W[W.length-1].date).getTime();
+  const span=Math.max(t1-t0,864e5*6);
+  const X=d=>pad.l+(D(d).getTime()-t0)/span*(w-pad.l-pad.r);
+  const Y=k=>pad.t+(hi-k)/(hi-lo)*(hgt-pad.t-pad.b);
+
+  const g=[];
+  g.push(`<defs>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C6FF3D" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#C6FF3D" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`);
+
+  // horizontal guides, at most 4
+  const stepKg=Math.max(Math.round((hi-lo)/4*2)/2,0.5);
+  for(let k=Math.ceil(lo/stepKg)*stepKg;k<=hi;k+=stepKg){
+    const y=Y(k);
+    if(y<pad.t-2||y>hgt-pad.b+2)continue;
+    g.push(`<line x1="0" y1="${y.toFixed(1)}" x2="${w-pad.r+4}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,.055)" stroke-width="1"/>`);
+    g.push(`<text x="${w-pad.r+10}" y="${(y+3.6).toFixed(1)}" fill="#6E756C" font-family="DM Mono,monospace" font-size="10.5">${k%1?k.toFixed(1):k}</text>`);
+  }
+
+  // smooth path through morning readings
+  if(morn.length>1){
+    const P=morn.map(d=>[X(d.date),Y(d.kg)]);
+    let dpath=`M ${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`;
+    for(let i=0;i<P.length-1;i++){
+      const [x0,y0]=P[i],[x1,y1]=P[i+1];
+      const cx=(x0+x1)/2;
+      dpath+=` C ${cx.toFixed(1)} ${y0.toFixed(1)}, ${cx.toFixed(1)} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+    }
+    g.push(`<path d="${dpath} L ${P[P.length-1][0].toFixed(1)} ${hgt-pad.b} L ${P[0][0].toFixed(1)} ${hgt-pad.b} Z" fill="url(#fill)"/>`);
+    g.push(`<path d="${dpath}" fill="none" stroke="#C6FF3D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>`);
+  }
+
+  // points
+  W.forEach((d,i)=>{
+    const x=X(d.date), y=Y(d.kg), isM=d.when==='morning';
+    const isLast=i===W.length-1;
+    if(isM){
+      if(isLast)g.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" fill="#C6FF3D" opacity=".16"/>`);
+      g.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#C6FF3D"/>`);
+      g.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#0A0B0A"/>`);
+    }else{
+      g.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#0A0B0A" stroke="#5C635A" stroke-width="1.8" stroke-dasharray="2.2 2"/>`);
+    }
+    const showVal = isM || W.length<=4;
+    if(showVal){
+      g.push(`<text x="${x.toFixed(1)}" y="${(y-14).toFixed(1)}" fill="${isM?'#EFF2EA':'#6E756C'}" font-family="Schibsted Grotesk,sans-serif" font-weight="${isM?600:400}" font-size="${isM?12.5:11}" text-anchor="middle">${d.kg}</text>`);
+    }
+    g.push(`<text x="${x.toFixed(1)}" y="${hgt-9}" fill="#5C635A" font-family="DM Mono,monospace" font-size="9.5" text-anchor="middle">${fs(d.date)}</text>`);
+  });
+
+  svg.innerHTML=g.join('');
+
+  const el=document.getElementById('read');
+  if(morn.length<2){
+    el.textContent="One clean morning reading so far. The line starts drawing itself from the second one.";
+  }else{
+    const diff=morn[morn.length-1].kg-morn[0].kg;
+    const days=Math.max(Math.round((D(morn[morn.length-1].date)-D(morn[0].date))/864e5),1);
+    el.textContent=`${diff>=0?'+':''}${diff.toFixed(1)} kg across ${days} day${days>1?'s':''}, morning to morning.`;
+  }
+}
+let chartTimer;
+window.addEventListener('resize',()=>{clearTimeout(chartTimer);chartTimer=setTimeout(()=>chart(allWeights()),180);});
+
+/* ---------- progression cards ---------- */
 function matrix(S){
   const names=[],map=new Map();
-  S.forEach(s=>s.lifts.forEach(l=>{if(!map.has(l.name)){map.set(l.name,{});names.push(l.name);}map.get(l.name)[s.date]=l.wh;}));
+  S.forEach(s=>s.lifts.forEach(l=>{if(!map.has(l.name)){map.set(l.name,{});names.push(l.name);}map.get(l.name)[s.date]=l;}));
   names.sort((a,b)=>Object.keys(map.get(b)).length-Object.keys(map.get(a)).length||a.localeCompare(b));
-  const cols=S.map(s=>s.date);
-  let h=`<thead><tr><th class="rh">Exercise</th>${cols.map(c=>`<th>${fs(c)}</th>`).join('')}</tr></thead><tbody>`;
-  names.forEach(n=>{
-    const r=map.get(n),seen=cols.filter(c=>r[c]!=null),last=r[seen[seen.length-1]];
-    const best=Math.max(...seen.map(c=>r[c]));
-    const prCol=seen.find(c=>r[c]===best);
-    h+=`<tr><td class="rn">${n}<small>${seen.length}× · PR ${best} kg</small></td>`;
-    cols.forEach(c=>{const v=r[c];
-      if(v==null){h+=`<td><div class="cell miss">·</div></td>`;return;}
-      const pr=c===prCol;
-      h+=`<td><div class="cell ${pr?'new':''}" title="${fs(c)} · ${v} kg${pr?' · personal record':''}">${v}</div></td>`;});
-    h+='</tr>';});
-  document.getElementById('matrix').innerHTML=h+'</tbody>';
+  const cols=S.map(s=>s.date).slice(-6);
+
+  document.getElementById('matrix').innerHTML=names.map(n=>{
+    const r=map.get(n);
+    const done=cols.filter(c=>r[c]);
+    if(!done.length)return '';
+    const loads=done.map(c=>r[c].wh);
+    const pr=Math.max(...loads);
+    const prCol=done.find(c=>r[c].wh===pr);
+    const top=pr*1.12;
+    const first=r[done[0]].wh, last=r[done[done.length-1]].wh;
+    const d=last-first;
+
+    const bars=cols.map(c=>{
+      if(!r[c])return '<div class="bar gap"><i></i><span>·</span></div>';
+      const v=r[c].wh, hp=Math.max((v/top)*100,12);
+      return `<div class="bar ${c===prCol?'pr':''}"><i style="height:${hp}%"></i><span>${v}</span></div>`;
+    }).join('');
+
+    const l=r[done[done.length-1]];
+    return `<div class="lift">
+      <div class="lift-top">
+        <span class="lift-nm">${n}</span>
+        <span class="lift-pr">PR <b>${pr} kg</b></span>
+      </div>
+      <div class="spark">${bars}</div>
+      <div class="spark-x">${cols.map(c=>`<span>${fs(c).replace(' ','\u00a0')}</span>`).join('')}</div>
+      <div class="lift-foot">
+        <span>${l.sets} sets · ${l.rl===l.rh?l.rh:l.rl+'–'+l.rh} reps</span>
+        <span class="${d>0?'up':d<0?'dn':''}">${d>0?'+'+d+' kg since start':d<0?d+' kg since start':'holding'}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ---------- split ---------- */
@@ -758,6 +850,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));
   window.scrollTo({top:0,behavior:'instant'});
+  if(b.dataset.v==='home')requestAnimationFrame(()=>chart(allWeights()));
 });
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));
@@ -955,10 +1048,16 @@ const STAPLES=[
   ["Rice cakes + peanut butter",180,6]]]
 ];
 const K_F="log:food:v1";
-let food={},foodDay=isoOf(new Date()),lastRemoved=null;
+let food={},foodDay=isoOf(new Date()),lastRemoved=null,rawBurn=false;
 
 function foodEntries(){return food[foodDay]||[];}
 async function saveFood(){return save(K_F,food);}
+
+const MAINTENANCE=2500, DEFICIT=500, BASE_PRO=145, BURN_HAIRCUT=0.75;
+function burnOn(day){
+  const raw=allSessions().filter(s=>s.date===day).reduce((t,s)=>t+(s.kcal||0),0);
+  return {raw:Math.round(raw), used:Math.round(raw*(rawBurn?1:BURN_HAIRCUT))};
+}
 
 function renderFood(){
   const e=foodEntries();
@@ -968,13 +1067,37 @@ function renderFood(){
   document.getElementById('f-day').textContent = foodDay===today?'Today':fl(foodDay);
   document.getElementById('f-next').disabled = foodDay>=today;
 
-  document.getElementById('g-kcal').innerHTML=`${kc.toLocaleString()}<u> / 2,000</u>`;
-  document.getElementById('g-pro').innerHTML=`${pr}<u> / 145 g</u>`;
+  const b=burnOn(foodDay);
+  const burned=MAINTENANCE+b.used;
+  const allow=burned-DEFICIT;
+  const left=allow-kc;
+  const actual=burned-kc;
+
+  document.getElementById('ebal').innerHTML=`
+    <div><div class="v num">${burned.toLocaleString()}</div><div class="k">Burned</div></div>
+    <div><div class="v num">${allow.toLocaleString()}</div><div class="k">Allowance</div></div>
+    <div><div class="v num">${kc.toLocaleString()}</div><div class="k">Eaten</div></div>
+    <div><div class="v num left ${left<0?'over':''}">${left.toLocaleString()}</div><div class="k">${left<0?'Over':'Left'}</div></div>`;
+
+  const cb=document.getElementById('eatback');
+  cb.checked=rawBurn;
+  document.getElementById('eb-note').textContent = b.raw
+    ? (rawBurn
+        ? `Using the machine's ${b.raw} kcal in full. It counts what you would have burned anyway, so it runs high.`
+        : `Machine said ${b.raw} kcal, counted as ${b.used}. Gym kit typically overstates by about a quarter.`)
+    : `No session on this day, so today is the base ${MAINTENANCE.toLocaleString()}.`;
+
+  document.getElementById('n-def').textContent = kc
+    ? (actual>=0 ? `${actual.toLocaleString()} kcal deficit so far today` : `${Math.abs(actual).toLocaleString()} kcal surplus today`)
+    : `Target deficit ${DEFICIT} kcal a day`;
+
+  document.getElementById('g-kcal').innerHTML=`${kc.toLocaleString()}<u> / ${allow.toLocaleString()}</u>`;
+  document.getElementById('g-pro').innerHTML=`${pr}<u> / ${BASE_PRO} g</u>`;
   const bk=document.getElementById('b-kcal'),bp=document.getElementById('b-pro');
-  bk.style.width=Math.min(kc/2000*100,100)+'%';bk.className=kc>2200?'over':'';
-  bp.style.width=Math.min(pr/145*100,100)+'%';bp.className='';
-  document.getElementById('n-kcal').textContent = kc>2200?`${kc-2000} over`:`${Math.max(2000-kc,0)} left`;
-  document.getElementById('n-pro').textContent = pr>=145?'target hit':`${145-pr} g to go`;
+  bk.style.width=Math.min(kc/allow*100,100)+'%';bk.className=kc>allow+200?'over':'';
+  bp.style.width=Math.min(pr/BASE_PRO*100,100)+'%';bp.className='';
+  document.getElementById('n-kcal').textContent = left<0?`${Math.abs(left)} over`:`${left} left`;
+  document.getElementById('n-pro').textContent = pr>=BASE_PRO?'target hit':`${BASE_PRO-pr} g to go`;
 
   document.getElementById('quick').innerHTML=STAPLES.map(([g,items])=>
     `<div class="fgroup"><span class="lab">${g}</span><div class="fgrid">${items.map(([n,k,p])=>
@@ -1032,6 +1155,11 @@ async function addFood(name,kcal,p,items){
   await saveFood();renderFood();
 }
 
+document.getElementById('eatback').onclick=async ev=>{
+  rawBurn=ev.target.checked;
+  try{await window.storage.set('log:rawburn',rawBurn?'1':'0');}catch(e){}
+  renderFood();
+};
 document.getElementById('f-prev').onclick=()=>{const d=D(foodDay);d.setDate(d.getDate()-1);foodDay=isoOf(d);renderFood();};
 document.getElementById('f-next').onclick=()=>{const d=D(foodDay);d.setDate(d.getDate()+1);
   if(isoOf(d)<=isoOf(new Date())){foodDay=isoOf(d);renderFood();}};
@@ -1071,7 +1199,9 @@ function mDraw(){
   document.querySelectorAll('#m-rows .mx').forEach(b=>b.onclick=()=>{mRows.splice(+b.dataset.i,1);mDraw();});
   mTotals();
 }
-function openModal(name,items,imgUrl){
+function openModal(name,items,imgUrl,note){
+  const nb=document.getElementById('m-note');
+  if(note){nb.innerHTML=note;nb.style.display='block';}else{nb.style.display='none';nb.innerHTML='';}
   mRows=(items&&items.length)?items:[{name:'',kcal:0,p:0}];
   document.getElementById('m-name').value=name||'Meal';
   const img=document.getElementById('m-shotimg');
@@ -1113,10 +1243,18 @@ async function estimate(content,label,imgUrl){
     const items=(p.items||[]).map(c=>({name:c.name||'Item',kcal:Math.round(+c.kcal||0),p:Math.round(+(c.protein!==undefined?c.protein:c.p)||0)}));
     if(!items.length)throw new Error("nothing came back to work with");
     msg('f-msg','Check it over, tweak anything that looks off.','ok');
-    openModal(p.name||label,items,imgUrl);
+    openModal(p.name||label,items,imgUrl,null);
   }catch(e){
-    msg('f-msg','Could not estimate: '+e.message+'. Fill it in yourself below.','err');
-    openModal(label,[{name:'',kcal:0,p:0}],imgUrl);
+    let why;
+    if(!apiKey){
+      why='<b>No API key saved.</b> Photo and description estimates call Anthropic directly, which needs your own key. Add one under <b>Add \u2192 Settings</b> and this will fill itself in from now on. Meanwhile, type the items in below.';
+    }else if(/failed|network|fetch/i.test(e.message)){
+      why='<b>Could not reach Anthropic.</b> If you opened this file directly rather than from a web address, the browser blocks the call. Host it on GitHub Pages and it will work. Type the items in below for now.';
+    }else{
+      why='<b>Estimate failed:</b> '+e.message+'. Type the items in below.';
+    }
+    msg('f-msg','Estimate unavailable, filling in manually.','err');
+    openModal(label,[{name:'',kcal:0,p:0}],imgUrl,why);
   }
 }
 
@@ -1124,32 +1262,6 @@ document.getElementById('f-est').onclick=()=>{
   const t=document.getElementById('f-desc').value.trim();
   if(!t){msg('f-msg','Describe what you ate first.','err');return;}
   estimate([{type:"text",text:FOOD_PROMPT+"\n\nWhat was eaten: "+t}],t);
-};
-document.getElementById('f-padd').onclick=async()=>{
-  const raw=document.getElementById('f-paste').value.trim();
-  if(!raw){msg('f-msg','Paste a line first, like: Steak dinner, 1150, 68','err');return;}
-  if(raw.startsWith('{')||raw.startsWith('[')){
-    try{
-      const p=JSON.parse(raw);
-      const list=Array.isArray(p)?p:[p];
-      for(const m of list){
-        const items=(m.items||[]).map(c=>Array.isArray(c)?{name:c[0],kcal:+c[1],p:+c[2]||0}:{name:c.name,kcal:+c.kcal,p:+(c.p??c.protein)||0});
-        const kc=isFinite(m.kcal)?+m.kcal:items.reduce((t,c)=>t+c.kcal,0);
-        const pr=isFinite(m.p??m.protein)?+(m.p??m.protein):items.reduce((t,c)=>t+c.p,0);
-        if(!m.name||!isFinite(kc)){msg('f-msg','That block is missing a name or calories.','err');return;}
-        await addFood(m.name,kc,pr,items);
-      }
-      document.getElementById('f-paste').value='';
-      msg('f-msg',`Logged ${list.length} item${list.length>1?'s':''}, tap to see the breakdown.`,'ok');
-    }catch(e){msg('f-msg','That did not parse. Check the whole block was copied.','err');}
-    return;
-  }
-  const parts=raw.split(',').map(s=>s.trim());
-  const p=parseFloat(parts.pop()),k=parseFloat(parts.pop()),name=parts.join(', ');
-  if(!name||!isFinite(k)||!isFinite(p)){msg('f-msg','Use the format: name, calories, protein','err');return;}
-  await addFood(name,k,p);
-  document.getElementById('f-paste').value='';
-  msg('f-msg',`Logged ${name}.`,'ok');
 };
 document.getElementById('f-cam').onclick=()=>{
   try{document.getElementById('f-file').click();}
