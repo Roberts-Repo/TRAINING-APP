@@ -1,3 +1,4 @@
+
 /* Training Log service worker
    HTML is network-first so updates appear immediately.
    Icons and fonts are cache-first for speed and offline use. */
