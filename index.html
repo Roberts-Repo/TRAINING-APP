@@ -192,6 +192,36 @@ button:hover:not([disabled]){filter:brightness(1.08)}
 .dl .x{background:none;border:none;color:#565C54;font-size:17px;line-height:1;padding:0 2px 0 10px;cursor:pointer}
 .dl .x:hover{color:var(--red)}
 
+.acty-toggle{background:transparent;color:var(--lime);border:none;padding:2px 4px;font-size:13px;font-weight:600;cursor:pointer}
+.chip.editing{border-color:rgba(255,107,78,.45)}
+.chip .cx{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;margin-left:8px;vertical-align:-3px}
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 16px);
+  transform:translate(-50%,14px);z-index:80;pointer-events:none;
+  background:var(--lime);color:#0A0B0A;border-radius:14px;
+  padding:12px 18px;font-size:14px;font-weight:600;letter-spacing:-.01em;
+  box-shadow:0 10px 30px -8px rgba(198,255,61,.45);
+  opacity:0;max-width:calc(100% - 40px);text-align:center;
+}
+#toast b{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:500;display:block;margin-top:2px;opacity:.75}
+@media(prefers-reduced-motion:no-preference){
+  #toast{transition:opacity .22s ease,transform .32s cubic-bezier(.2,.9,.3,1)}
+}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* tap pulse */
+@media(prefers-reduced-motion:no-preference){
+  .chip.pulse{animation:pulse .42s cubic-bezier(.3,.9,.4,1)}
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  35%{transform:scale(.94);background:var(--lime);border-color:var(--lime)}
+  100%{transform:scale(1)}
+}
+.chip.pulse{background:var(--lime);border-color:var(--lime);color:#0A0B0A}
+.chip.pulse small{color:rgba(10,11,10,.65)}
+
 /* food */
 .steps-in{display:flex;gap:9px;align-items:flex-end;margin:-2px 0 18px}
 .steps-in label{flex:1 1 auto}
@@ -454,7 +484,7 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
 
   <!-- screenshots -->
   <div id="m-shot" style="display:none">
-    <div class="note" style="margin-bottom:12px"><h3>Only works in a browser</h3><p>The Claude app's file viewer blocks pages from opening a file picker, so the box below will not respond in the app. Open this file in Chrome and it works. On your phone, use <strong style="color:var(--tx)">Paste from chat</strong>.</p></div>
+    <div class="note good" style="margin-bottom:12px"><h3>Needs your API key</h3><p>Reading screenshots calls Anthropic, so set your key under <strong style="color:var(--tx)">Settings</strong> below. If the file picker does not open at all, you are in the Claude app viewer rather than a browser, and it blocks file access.</p></div>
     <div class="drop" id="drop" role="button" tabindex="0">
       <div class="big">Choose your workout screenshots</div>
       <p>One session at a time. Overlapping shots are fine.</p>
@@ -504,8 +534,8 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
       <button id="f-next" aria-label="Next day">›</button>
     </div>
     <div class="steps-in">
-      <label><span class="lab">Steps today, from your phone</span>
-        <input type="number" id="d-steps" inputmode="numeric" placeholder="7179"></label>
+      <label><span class="lab">Total burnt calories, from Samsung Health</span>
+        <input type="number" id="d-steps" inputmode="numeric" placeholder="2134"></label>
       <button id="steps-save">Save</button>
     </div>
     <div class="ebal" id="ebal"></div>
@@ -526,7 +556,7 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
     </label>
   </div>
 
-  <div class="head"><h2>Quick add</h2><span class="lab">tap to log</span></div>
+  <div class="head"><h2>Quick add</h2><button id="q-edit" class="acty-toggle">Edit</button></div>
   <div class="card" id="quick"></div>
 
   <div class="head"><h2>Eating out</h2><span class="lab">photo or description</span></div>
@@ -562,6 +592,10 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
     <div class="mcols"><span class="c1">Item</span><span class="c2">Kcal</span><span class="c3">Prot</span><span class="c4"></span></div>
     <div id="m-rows"></div>
     <button id="m-addrow" class="ghost" style="width:100%;margin-top:8px">Add an item</button>
+    <label class="eatback" id="m-keep-wrap" style="margin-top:16px;padding-top:16px">
+      <input type="checkbox" id="m-keep">
+      <span>Keep this as a quick add button<small>It joins My meals at the top of the quick add list, ready to tap again.</small></span>
+    </label>
     <div class="row" style="margin-top:18px">
       <button id="m-save" style="flex:1 1 60%">Log it</button>
       <button id="m-cancel" class="ghost" style="flex:1 1 30%">Cancel</button>
@@ -569,6 +603,8 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
     <p class="hint">Estimates from a photo are rough. Tweak anything that looks off, and add whatever was missed.</p>
   </div>
 </div>
+
+<div id="toast" role="status" aria-live="polite"></div>
 
 <nav>
   <div class="navin">
@@ -581,6 +617,19 @@ footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--bd2);font-siz
 </nav>
 
 <script>
+/* ---- API access: proxied inside Claude, direct with a key outside ---- */
+const INSIDE_CLAUDE = !!(window.storage && !window.__shimmed);
+let apiKey = null;
+try{ apiKey = localStorage.getItem('log:apikey') || null; }catch(e){}
+
+function callClaude(content){
+  const body=JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content}]});
+  const headers={"Content-Type":"application/json"};
+  if(apiKey){headers["x-api-key"]=apiKey;headers["anthropic-version"]="2023-06-01";headers["anthropic-dangerous-direct-browser-access"]="true";}
+  return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body});
+}
+
+
 /* ---------- seed ---------- */
 const SEED_SESSIONS=[
  {date:"2026-08-09",moves:540,kcal:320,mins:52.5,
@@ -623,6 +672,7 @@ async function load(){
   try{const r=await window.storage.get(K_F);if(r)food=JSON.parse(r.value);}catch(e){}
   try{const r=await window.storage.get('log:rawburn');if(r)rawBurn=(r.value==='1');}catch(e){}
   try{const r=await window.storage.get(K_ST);if(r)steps=JSON.parse(r.value);}catch(e){}
+  try{const r=await window.storage.get(K_C);if(r)custom=JSON.parse(r.value);}catch(e){}
   render();renderFood();
 }
 async function save(k,v){try{await window.storage.set(k,JSON.stringify(v));return true;}catch(e){return false;}}
@@ -636,6 +686,15 @@ const isLeg=n=>/leg|squat|calf|glute|hamstring|lunge|hip/i.test(n);
 const isPush=n=>/press|fly|adduction|extension$|dip|tricep/i.test(n)&&!isLeg(n);
 const isPull=n=>/row|pulldown|traction|curl|reverse/i.test(n)&&!isLeg(n);
 const volume=s=>Math.round(s.lifts.reduce((t,l)=>t+l.sets*((l.rl+l.rh)/2)*((l.wl+l.wh)/2),0));
+let toastTimer;
+function toast(line,sub){
+  const el=document.getElementById('toast');
+  el.innerHTML=line+(sub?`<b>${sub}</b>`:'');
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('on'),2200);
+  if(navigator.vibrate){try{navigator.vibrate(18);}catch(e){}}
+}
 const msg=(id,t,c)=>{const e=document.getElementById(id);e.innerHTML=t;e.className='msg '+(c||'');};
 const num=v=>{const n=parseFloat(v);return isFinite(n)?n:null;};
 
@@ -989,8 +1048,7 @@ readBtn.onclick=async()=>{
     const content=[];
     for(const f of picked)content.push({type:"image",source:{type:"base64",media_type:f.type==='image/png'?'image/png':'image/jpeg',data:await toB64(f)}});
     content.push({type:"text",text:PROMPT});
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content}]})});
+    const res=await callClaude(content);
     if(!res.ok)throw new Error("the reader returned "+res.status);
     const data=await res.json();
     const txt=data.content.filter(b=>b.type==="text").map(b=>b.text).join("").replace(/```json|```/g,"").trim();
@@ -1000,7 +1058,12 @@ readBtn.onclick=async()=>{
     showPreview(pending);msg('s-msg','Check it over, then save.','ok');
   }catch(e){
     document.getElementById('preview').innerHTML='';
-    msg('s-msg','Reading failed: '+e.message+'. Switch to <strong>Type it in</strong> above, it takes about a minute.','err');
+    const why = !apiKey
+      ? 'No API key saved. Add one under <strong>Add \u2192 Settings</strong>, then try again.'
+      : /fetch|network|load failed/i.test(e.message)
+        ? 'Could not reach Anthropic. If you opened this file directly rather than from its web address, the browser blocks the call.'
+        : e.message;
+    msg('s-msg','Reading failed. '+why+'<br>Or switch to <strong>Type it in</strong> above, it takes about a minute.','err');
   }
   readBtn.innerHTML=orig;readBtn.disabled=false;
 };
@@ -1033,6 +1096,7 @@ document.getElementById('w-add').onclick=async()=>{
   const ok=await save(K_W,addedWeights);
   msg('w-msg',ok?`Saved ${k} kg for ${fs(d)}.`:'Saved for this visit only, storage is unavailable.',ok?'ok':'err');
   document.getElementById('w-kg').value='';render();
+  toast('Weigh-in saved',`${k} kg on ${fs(d)}`);
 };
 document.getElementById('exp').onclick=()=>{
   const t=document.getElementById('dump');t.style.display='block';
@@ -1067,28 +1131,12 @@ const STAPLES=[
 const K_F="log:food:v1";
 let food={},foodDay=isoOf(new Date()),lastRemoved=null,rawBurn=false,steps={};
 const K_ST='log:steps:v1';
+let custom=[];const K_C='log:custom:v1';let editQuick=false;
 
 function foodEntries(){return food[foodDay]||[];}
 async function saveFood(){return save(K_F,food);}
 
 const MAINTENANCE=1995, DEFICIT=500, BASE_PRO=145, BURN_HAIRCUT=0.75;
-const BODY_KG=90.2;              // used for the walking cost
-const STRIDE_M=0.78;             // average stride at 5ft 10
-const STEPS_PER_KM=Math.round(1000/STRIDE_M);
-const BASE_STEPS=0;              // base assumes no walking, so every step counts
-const KCAL_PER_STEP=0.0003*BODY_KG;   // net of resting, about 0.027 at 90 kg
-
-/* distance already covered inside a logged session, so it is not counted twice */
-function gymKm(day){
-  return allSessions().filter(s=>s.date===day)
-    .reduce((t,s)=>t+(s.cardio||[]).reduce((a,c)=>a+(+c.km||0),0),0);
-}
-function walkOn(day){
-  const total=+(steps[day]||0);
-  const gymSteps=Math.round(gymKm(day)*STEPS_PER_KM);
-  const net=Math.max(total-gymSteps-BASE_STEPS,0);
-  return {total, gymSteps, net, kcal:Math.round(net*KCAL_PER_STEP)};
-}
 function burnOn(day){
   const raw=allSessions().filter(s=>s.date===day).reduce((t,s)=>t+(s.kcal||0),0);
   return {raw:Math.round(raw), used:Math.round(raw*(rawBurn?1:BURN_HAIRCUT))};
@@ -1103,21 +1151,19 @@ function renderFood(){
   document.getElementById('f-next').disabled = foodDay>=today;
 
   const b=burnOn(foodDay);
-  const wk=walkOn(foodDay);
-  const burned = MAINTENANCE+b.used+wk.kcal;
+  const sam = +(steps[foodDay]||0);
+  const burned = sam>0 ? sam : MAINTENANCE+b.used;
   document.getElementById('d-steps').value = steps[foodDay]||'';
   const allow=burned-DEFICIT;
   const left=allow-kc;
   const actual=burned-kc;
 
-  const rows=[`<div class="lg"><span>Base burn<small>BMR 1,813 plus digestion and fidgeting, no walking at all</small></span><span>${MAINTENANCE.toLocaleString()}</span></div>`];
-  if(b.used){
-    rows.push(`<div class="lg add"><span>Gym session<small>machine said ${b.raw}${rawBurn?', counted in full':', trimmed by a quarter'}</small></span><span>+${b.used.toLocaleString()}</span></div>`);
-  }
-  if(wk.total){
-    const bits=[`${wk.total.toLocaleString()} steps`];
-    if(wk.gymSteps)bits.push(`less ${wk.gymSteps.toLocaleString()} done on the treadmill`);
-    rows.push(`<div class="lg ${wk.kcal?'add':''}"><span>Walking<small>${bits.join(', ')}</small></span><span>${wk.kcal?'+'+wk.kcal:'0'}</span></div>`);
+  const rows=[];
+  if(sam>0){
+    rows.push(`<div class="lg"><span>Samsung Health<small>your measured total: base rate, every step and the gym, all in</small></span><span>${sam.toLocaleString()}</span></div>`);
+  }else{
+    rows.push(`<div class="lg"><span>Base burn<small>estimate used until you enter the Samsung figure</small></span><span>${MAINTENANCE.toLocaleString()}</span></div>`);
+    if(b.used)rows.push(`<div class="lg add"><span>Gym session<small>machine said ${b.raw}${rawBurn?', counted in full':', trimmed by a quarter'}</small></span><span>+${b.used.toLocaleString()}</span></div>`);
   }
   rows.push(`<div class="lg rule sum"><span>Burned today</span><span>${burned.toLocaleString()}</span></div>`);
   rows.push(`<div class="lg sub"><span>Target deficit</span><span>\u2212${DEFICIT.toLocaleString()}</span></div>`);
@@ -1128,7 +1174,9 @@ function renderFood(){
 
   const cb=document.getElementById('eatback');
   cb.checked=rawBurn;
-  document.getElementById('eb-note').textContent = b.raw
+  document.getElementById('eb-note').textContent = sam>0
+    ? `Using your Samsung total of ${sam.toLocaleString()} kcal. Enter it at the end of the day, a part-day figure will read low.`
+    : b.raw
       ? (rawBurn
           ? `Using the machine's ${b.raw} kcal in full. It counts what you would have burned anyway, so it runs high.`
           : `Machine said ${b.raw} kcal, counted as ${b.used}. Gym kit typically overstates by about a quarter.`)
@@ -1146,11 +1194,41 @@ function renderFood(){
   document.getElementById('n-kcal').textContent = left<0?`${Math.abs(left)} over`:`${left} left`;
   document.getElementById('n-pro').textContent = pr>=BASE_PRO?'target hit':`${BASE_PRO-pr} g to go`;
 
-  document.getElementById('quick').innerHTML=STAPLES.map(([g,items])=>
+  const mine = custom.length
+    ? `<div class="fgroup"><span class="lab">My meals</span><div class="fgrid">${custom.map((c,i)=>
+        `<button class="chip ${editQuick?'editing':''}" data-ci="${i}">${c.name}<small>${Math.round(c.kcal)} kcal · ${Math.round(c.p)}g P</small>${editQuick?'<span class="cx">×</span>':''}</button>`).join('')}</div></div>`
+    : '';
+  document.getElementById('quick').innerHTML = mine + STAPLES.map(([g,items])=>
     `<div class="fgroup"><span class="lab">${g}</span><div class="fgrid">${items.map(([n,k,p])=>
       `<button class="chip" data-n="${n}" data-k="${k}" data-p="${p}">${n}<small>${k} kcal · ${p}g P</small></button>`).join('')}</div></div>`).join('');
-  document.querySelectorAll('#quick .chip').forEach(b=>b.onclick=async()=>{
-    addFood(b.dataset.n,+b.dataset.k,+b.dataset.p);
+  document.getElementById('q-edit').textContent = editQuick?'Done':'Edit';
+
+  document.querySelectorAll('#quick .chip').forEach(b=>b.onclick=async ev=>{
+    const ci=b.dataset.ci;
+    if(ci!==undefined){
+      const c=custom[+ci];
+      if(editQuick){
+        if(ev.target.classList.contains('cx')){
+          custom.splice(+ci,1);await save(K_C,custom);renderFood();
+          toast('Removed from quick add',c.name);
+          return;
+        }
+        openModal(c.name,(c.items||[{name:c.name,kcal:c.kcal,p:c.p}]).map(x=>({...x})),null,null,{type:'editLib',idx:+ci});
+        return;
+      }
+      b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse');
+      setTimeout(()=>b.classList.remove('pulse'),430);
+      await addFood(c.name,c.kcal,c.p,c.items&&c.items.length>1?c.items.map(x=>({...x})):null);
+      const tot=Math.round(foodEntries().reduce((t,x)=>t+x.kcal,0));
+      toast(`Added ${c.name}`,`+${Math.round(c.kcal)} kcal · +${Math.round(c.p)}g · ${tot.toLocaleString()} today`);
+      return;
+    }
+    b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse');
+    setTimeout(()=>b.classList.remove('pulse'),430);
+    const k=+b.dataset.k,pp=+b.dataset.p;
+    await addFood(b.dataset.n,k,pp);
+    const tot=Math.round(foodEntries().reduce((t,x)=>t+x.kcal,0));
+    toast(`Added ${b.dataset.n}`,`+${k} kcal · +${pp}g · ${tot.toLocaleString()} today`);
   });
 
   const entryHtml=(x,i)=>{
@@ -1173,9 +1251,11 @@ function renderFood(){
     ev.preventDefault();ev.stopPropagation();
     const i=+b.dataset.i;
     lastRemoved={day:foodDay,index:i,entry:food[foodDay][i]};
+    const gone=food[foodDay][i];
     food[foodDay].splice(i,1);
     if(!food[foodDay].length)delete food[foodDay];
-    await saveFood();renderFood();});
+    await saveFood();renderFood();
+    toast(`Removed ${gone.name}`,`\u2212${Math.round(gone.kcal)} kcal`);});
 
   const undo=document.getElementById('f-undo');
   if(undo)undo.onclick=async()=>{
@@ -1207,11 +1287,13 @@ document.getElementById('eatback').onclick=async ev=>{
   try{await window.storage.set('log:rawburn',rawBurn?'1':'0');}catch(e){}
   renderFood();
 };
+document.getElementById('q-edit').onclick=()=>{editQuick=!editQuick;renderFood();};
 document.getElementById('steps-save').onclick=async()=>{
   const v=parseInt(document.getElementById('d-steps').value,10);
   if(v>0)steps[foodDay]=v; else delete steps[foodDay];
   try{await window.storage.set(K_ST,JSON.stringify(steps));}catch(e){}
   renderFood();
+  toast(v>0?'Burn updated':'Burn cleared', v>0?`${v.toLocaleString()} kcal for this day`:'back to the estimate');
 };
 document.getElementById('f-prev').onclick=()=>{const d=D(foodDay);d.setDate(d.getDate()-1);foodDay=isoOf(d);renderFood();};
 document.getElementById('f-next').onclick=()=>{const d=D(foodDay);d.setDate(d.getDate()+1);
@@ -1228,7 +1310,7 @@ Return ONLY a JSON object, no markdown fences, no explanation:
 - Between 1 and 12 items. If it is a single simple thing, return one item.`;
 
 /* ---- editable estimate modal ---- */
-let mRows=[],mImgUrl=null;
+let mRows=[],mImgUrl=null,mMode={type:'log'};
 const scrim=document.getElementById('scrim');
 
 function mTotals(){
@@ -1252,7 +1334,12 @@ function mDraw(){
   document.querySelectorAll('#m-rows .mx').forEach(b=>b.onclick=()=>{mRows.splice(+b.dataset.i,1);mDraw();});
   mTotals();
 }
-function openModal(name,items,imgUrl,note){
+function openModal(name,items,imgUrl,note,mode){
+  mMode=mode||{type:'log'};
+  const lib=mMode.type==='editLib';
+  document.getElementById('m-keep-wrap').style.display=lib?'none':'flex';
+  document.getElementById('m-keep').checked=false;
+  document.getElementById('m-save').textContent=lib?'Save changes':'Log it';
   const nb=document.getElementById('m-note');
   if(note){nb.innerHTML=note;nb.style.display='block';}else{nb.style.display='none';nb.innerHTML='';}
   mRows=(items&&items.length)?items:[{name:'',kcal:0,p:0}];
@@ -1276,13 +1363,25 @@ scrim.onclick=ev=>{if(ev.target===scrim)closeModal();};
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&scrim.classList.contains('on'))closeModal();});
 document.getElementById('m-save').onclick=async()=>{
   const items=mRows.filter(r=>String(r.name||'').trim()||r.kcal).map(r=>({name:String(r.name||'Item').trim(),kcal:+r.kcal||0,p:+r.p||0}));
-  if(!items.length){msg('f-msg','Nothing to log, add at least one item.','err');return;}
+  if(!items.length){msg('f-msg','Nothing to save, add at least one item.','err');return;}
   const name=document.getElementById('m-name').value.trim()||'Meal';
   const k=items.reduce((t,r)=>t+r.kcal,0),p=items.reduce((t,r)=>t+r.p,0);
+  const keep=document.getElementById('m-keep').checked;
+  const entry={name,kcal:k,p,items:items.length>1?items:undefined};
   closeModal();
+
+  if(mMode.type==='editLib'){
+    custom[mMode.idx]=entry;
+    await save(K_C,custom);renderFood();
+    toast('Quick add updated',`${name}, ${Math.round(k)} kcal`);
+    return;
+  }
+
+  if(keep){custom.unshift(entry);await save(K_C,custom);}
   await addFood(name,k,p,items.length>1?items:null);
   document.getElementById('f-desc').value='';
   msg('f-msg','Logged '+name+', '+Math.round(k)+' kcal.','ok');
+  toast(`Added ${name}`,keep?`Saved to quick add · +${Math.round(k)} kcal`:`+${Math.round(k)} kcal · +${Math.round(p)}g protein`);
 };
 
 async function estimate(content,label,imgUrl){
@@ -1330,18 +1429,6 @@ document.getElementById('f-file').addEventListener('change',async ev=>{
   ev.target.value='';
 });
 
-
-/* ---- API access: proxied inside Claude, direct with a key outside ---- */
-const INSIDE_CLAUDE = !!(window.storage && !window.__shimmed);
-let apiKey = null;
-try{ apiKey = localStorage.getItem('log:apikey') || null; }catch(e){}
-
-function callClaude(content){
-  const body=JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content}]});
-  const headers={"Content-Type":"application/json"};
-  if(apiKey){headers["x-api-key"]=apiKey;headers["anthropic-version"]="2023-06-01";headers["anthropic-dangerous-direct-browser-access"]="true";}
-  return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body});
-}
 
 (function initKeyUI(){
   const card=document.getElementById('keycard');
